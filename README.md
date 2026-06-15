@@ -56,46 +56,7 @@
 5. **Submission** — Clicks submit, waits for `Judging…` to appear then disappear, reads result.
 6. **Rate limiting** — 8s delay between each problem. 15s cooldown every 5th. Time estimate printed before the run starts.
 
----
 
-## 🗂️ Architecture
-
-```
-leetcode-solver-bot/
-│
-├── src/
-│   ├── index.tsx                 # Entry point — renders Ink TUI
-│   ├── config.js                 # Environment config from .env
-│   │
-│   ├── tui/
-│   │   ├── App.tsx               # Main app — orchestrates all phases
-│   │   └── components/
-│   │       ├── Banner.tsx        # ASCII art + quote
-│   │       ├── LoginPrompt.tsx   # Cloudflare login instructions
-│   │       ├── ProblemInput.tsx  # How many problems? prompt
-│   │       ├── Progress.tsx      # Live problem feed + verdicts
-│   │       └── Complete.tsx      # Run summary screen
-│   │
-│   ├── browser/
-│   │   └── BrowserManager.js     # Puppeteer singleton
-│   │
-│   ├── api/
-│   │   └── LeetCodeAPI.js        # GraphQL client — problem status
-│   │
-│   ├── core/
-│   │   ├── Authenticator.js      # Login + cookie extraction
-│   │   └── Solver.js             # Language switch · inject · submit · verdict
-│   │
-│   ├── file/
-│   │   └── FileManager.js        # Read problems/ · manage SolvedProblems.json
-│   │
-│   └── utils/
-│       ├── Logger.js             # Chalk-based colored output
-│       └── helpers.js            # sleep()
-│
-└── data/
-    └── problems/                 # 1,465+ C++ solution JSON files
-```
 
 ---
 
