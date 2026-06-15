@@ -1,5 +1,5 @@
 import {promises as fs} from 'fs';
-import {USER_DATA_PATH, SOLVED_PROBLEMS_PATH} from '../config.js';
+import {getUserDataPath, getSolvedProblemsPath} from '../config.js';
 import Logger from '../utils/Logger.js';
 
 const PROBLEMS_DIR = './data/problems';
@@ -22,17 +22,17 @@ class FileManager {
 
   static async #ensureSolvedProblemSetFile() {
     try {
-      await fs.access(SOLVED_PROBLEMS_PATH);
+      await fs.access(getSolvedProblemsPath());
     } catch (_) {
-      Logger.warn(`${SOLVED_PROBLEMS_PATH} was not found, created the file.`);
-      await fs.mkdir(USER_DATA_PATH, {recursive: true});
-      await fs.writeFile(SOLVED_PROBLEMS_PATH, JSON.stringify([]));
+      Logger.warn(`${getSolvedProblemsPath()} was not found, created the file.`);
+      await fs.mkdir(getUserDataPath(), {recursive: true});
+      await fs.writeFile(getSolvedProblemsPath(), JSON.stringify([]));
     }
   }
 
   static async getSolvedProblemSet() {
     await this.#ensureSolvedProblemSetFile();
-    const data = await fs.readFile(SOLVED_PROBLEMS_PATH, 'utf8');
+    const data = await fs.readFile(getSolvedProblemsPath(), 'utf8');
     return new Set(JSON.parse(data));
   }
 
@@ -40,7 +40,7 @@ class FileManager {
     const problemSet = await this.getSolvedProblemSet();
     problemSet.add(problemName);
     Logger.success(`[CACHED]\t\t\t:${problemName}`);
-    await fs.writeFile(SOLVED_PROBLEMS_PATH, JSON.stringify(Array.from(problemSet)));
+    await fs.writeFile(getSolvedProblemsPath(), JSON.stringify(Array.from(problemSet)));
   }
 }
 

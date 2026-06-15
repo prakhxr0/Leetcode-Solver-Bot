@@ -5,7 +5,9 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "node --import tsx/esm src/index.tsx"
+    "start": "node --import tsx/esm src/index.tsx",
+    "start:headless": "HEADLESS=true node --import tsx/esm src/index.tsx",
+    "login": "HEADLESS=false node --import tsx/esm src/index.tsx"
   },
   "keywords": [
     "leetcode",

@@ -1,0 +1,9 @@
+node_modules
+npm-debug.log
+.env
+.email
+UserData
+.git
+.gitignore
+README.md
+assets

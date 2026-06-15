@@ -41,6 +41,7 @@
 | **Smart rate limiting** | 8s between submissions, 15s cooldown every 5 problems — time estimate shown upfront |
 | **Verdict detection** | Polls "Judging…" state transitions to capture the actual result reliably |
 | **Skip logic** | Auto-skips already-solved and premium problems via GraphQL status check |
+| **Docker support** | Self-contained container with Chromium; run headless after first login |
 
 
 ---
@@ -49,12 +50,14 @@
 ![Workflow Diagram](./assets/architecture.png)
 **Phase breakdown:**
 
-1. **Problem selection** — GraphQL checks solved/premium status. Reads solution from `data/problems/` locally.
-2. **Browser setup** — Puppeteer with a persistent Chrome profile. Cloudflare sessions survive restarts.
-3. **Navigation** — Loads the problem URL, waits on `domcontentloaded` (not `networkidle2` — avoids Cloudflare hangs).
-4. **Injection** — Switches editor language to C++ if needed. Injects via Monaco API and verifies with `value.includes('class Solution') && value.length > 50`.
-5. **Submission** — Clicks submit, waits for `Judging…` to appear then disappear, reads result.
-6. **Rate limiting** — 8s delay between each problem. 15s cooldown every 5th. Time estimate printed before the run starts.
+1. **Email setup** — TUI asks for your LeetCode email (saved for future runs)
+2. **Cloudflare login** — First run opens headed Chrome; complete challenge manually
+3. **Problem selection** — GraphQL checks solved/premium status. Reads solution from `data/problems/` locally.
+4. **Browser setup** — Puppeteer with a persistent Chrome profile. Sessions survive restarts.
+5. **Navigation** — Loads the problem URL, waits on `domcontentloaded` (not `networkidle2` — avoids Cloudflare hangs).
+6. **Injection** — Switches editor language to C++ if needed. Injects via Monaco API and verifies with `value.includes('class Solution') && value.length > 50`.
+7. **Submission** — Clicks submit, waits for `Judging…` to appear then disappear, reads result.
+8. **Rate limiting** — 8s delay between each problem. 15s cooldown every 5th. Time estimate printed before the run starts.
 
 
 
@@ -64,22 +67,41 @@
 
 ### Prerequisites
 
-- Node.js 18+
-- Chrome or Chromium
-- WSL2 (optional, for Windows users)
+- Node.js 18+ (for development)
+- Docker (for production)
+- Chrome or Chromium (optional for development)
 
-### Installation
+### Docker Setup (Recommended)
+
+**1. Clone & build**
+```bash
+git clone https://github.com/PrakharMishra531/Leetcoder.git
+cd Leetcoder
+docker-compose build
+```
+
+**2. Run (first time - login mode)**
+```bash
+HEADLESS=false docker-compose run leetcode
+```
+A Chrome window will open. Complete the Cloudflare challenge manually — the session is persisted.
+
+**3. Run (subsequent runs - headless)**
+```bash
+HEADLESS=true docker-compose run leetcode
+```
+
+### Development Setup
 
 **1. Clone & install**
 ```bash
-git clone https://github.com/your-username/leetcode-solver-bot
-cd leetcode-solver-bot
+git clone https://github.com/PrakharMishra531/Leetcoder.git
+cd Leetcoder
 npm install
 ```
 
 **2. Create your `.env`**
 ```env
-USER_EMAIL=your-email@example.com
 GOOGLE_CHROME_EXECUTABLE_PATH=/path/to/chrome   # optional — auto-detected if omitted
 ```
 
@@ -88,7 +110,34 @@ GOOGLE_CHROME_EXECUTABLE_PATH=/path/to/chrome   # optional — auto-detected if 
 npm start
 ```
 
-A Chrome window will open on first run. Complete the Cloudflare challenge manually — the session is persisted, so you won't have to do this again.
+### Platform Support
+
+| Platform | Setup |
+|----------|-------|
+| **Linux** | Native X11, works automatically |
+| **macOS** | Install XQuartz: `brew install --cask xquartz`, then logout/login |
+| **WSL2** | WSLg is built-in on Windows 11, works automatically |
+| **Windows Docker Desktop** | Use WSL2 backend (recommended) or Hyper-V with X server |
+
+### Docker Commands
+
+```bash
+# Allow Docker to access X11 (Linux/macOS)
+xhost +local:docker
+
+# First time - login mode (headed Chrome)
+HEADLESS=false docker-compose run leetcode
+
+# Subsequent runs - headless mode (no display needed)
+HEADLESS=true docker-compose run leetcode
+
+# Rebuild after code changes
+docker-compose build
+
+# Clear data and start fresh
+rm -rf ./UserData
+HEADLESS=true docker-compose run leetcode
+```
 
 ---
 
@@ -137,14 +186,24 @@ Drop new solutions into `data/problems/` as JSON files following the existing fo
 
 </details>
 
+<details>
+<summary><b>Deployment</b></summary>
+
+- **Docker** — Self-contained container with Chromium
+- **Docker Compose** — Easy setup and configuration
+- **Volumes** — Persistent Chrome profile and solved problems
+
+</details>
+
 ---
 
 ## ⚠️ Known Limitations
 
-- **Cloudflare** — Requires a one-time manual login. Browser must stay visible (headed mode only).
+- **Cloudflare** — Requires a one-time manual login in headed mode. After that, headless mode works.
 - **Rate delays** — Fixed cooldowns; may need tuning for different network conditions.
 - **Premium problems** — Detected via GraphQL and skipped automatically. Can't solve what you can't see.
 - **Session expiry** — Long breaks may require re-authentication.
+- **Docker image size** — ~500MB-1GB due to bundled Chromium and problem archive.
 
 ---
 

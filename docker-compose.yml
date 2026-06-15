@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  leetcode:
+    build: .
+    container_name: leetcode-solver-bot
+    stdin_open: true
+    tty: true
+    environment:
+      - DISPLAY=${DISPLAY}
+      - HEADLESS=${HEADLESS:-false}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ./UserData:/app/UserData
+    network_mode: host

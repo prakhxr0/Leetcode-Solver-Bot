@@ -1,6 +1,7 @@
 import React, {useState, useCallback, useEffect} from 'react';
 import {Box, Text} from 'ink';
 import Banner from './components/Banner.tsx';
+import EmailInput from './components/EmailInput.tsx';
 import LoginPrompt from './components/LoginPrompt.tsx';
 import ProblemInput from './components/ProblemInput.tsx';
 import Progress from './components/Progress.tsx';
@@ -8,9 +9,11 @@ import Complete from './components/Complete.tsx';
 import Authenticator from '../core/Authenticator.js';
 import FileManager from '../file/FileManager.js';
 import {closeBrowser} from '../browser/BrowserManager.js';
+import {setEmail, getUserEmail} from '../config.js';
 
 const PHASES = {
   BANNER: 'banner',
+  EMAIL: 'email',
   LOGIN: 'login',
   INPUT: 'input',
   SOLVING: 'solving',
@@ -29,10 +32,21 @@ const App = () => {
   // Auto-advance banner after 2s
   useEffect(() => {
     if (phase === PHASES.BANNER) {
-      const timer = setTimeout(() => setPhase(PHASES.LOGIN), 2000);
+      const timer = setTimeout(() => {
+        const savedEmail = getUserEmail();
+        if (savedEmail && savedEmail !== 'temp@temp.com') {
+          setPhase(PHASES.LOGIN);
+        } else {
+          setPhase(PHASES.EMAIL);
+        }
+      }, 2000);
       return () => clearTimeout(timer);
     }
   }, [phase]);
+
+  const handleEmailSubmit = useCallback((submittedEmail) => {
+    setPhase(PHASES.LOGIN);
+  }, []);
 
   const handleLoginReady = useCallback(async () => {
     setPhase(PHASES.INPUT);
@@ -193,7 +207,8 @@ const App = () => {
 
   return (
     <Box flexDirection="column">
-      {(phase === PHASES.BANNER || phase === PHASES.LOGIN) && <Banner />}
+      {(phase === PHASES.BANNER || phase === PHASES.LOGIN || phase === PHASES.EMAIL) && <Banner />}
+      {phase === PHASES.EMAIL && <EmailInput onSubmit={handleEmailSubmit} />}
       {phase === PHASES.LOGIN && <LoginPrompt onReady={handleLoginReady} />}
       {phase === PHASES.INPUT && <ProblemInput onSubmit={handleCountSubmit} />}
       {phase === PHASES.SOLVING && (
