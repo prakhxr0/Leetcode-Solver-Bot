@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {Box, Text} from 'ink';
 
 const STATUS_STYLES = {
@@ -10,17 +10,56 @@ const STATUS_STYLES = {
   queued: {color: '#666', icon: '·', label: 'queued'},
 };
 
-const Progress = ({results, total, current, limit}) => {
+const formatTime = (totalSeconds) => {
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = Math.floor(totalSeconds % 60);
+  if (h > 0) {
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+};
+
+const formatETA = (seconds) => {
+  if (!isFinite(seconds) || seconds <= 0) return '—';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0) return `~${h}h ${m}m left`;
+  return `~${m}m left`;
+};
+
+const Progress = ({results, total, current, limit, startTime}) => {
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setElapsed((Date.now() - startTime) / 1000);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [startTime]);
+
+  const solved = results.filter(r => r.status === 'solved').length;
+  const skipped = results.filter(r => r.status === 'skipped').length;
+  const failed = results.filter(r => r.status === 'failed').length;
+  const processed = solved + skipped + failed + results.filter(r => r.status === 'premium').length;
+  const target = limit === Infinity ? total : limit;
+  const remaining = Math.max(0, target - processed);
+
+  const rate = elapsed > 0 ? (solved / elapsed) * 3600 : 0;
+  const eta = rate > 0 ? remaining / (rate / 3600) : Infinity;
+
   return (
     <Box flexDirection="column" marginTop={1} paddingX={2}>
-      <Box marginBottom={1}>
+      <Box marginBottom={1} gap={2}>
         <Text color="#FFA116" bold>{'  PROGRESS'}</Text>
-        <Text color="#555">
-          {'  ─── '}
-        </Text>
-        <Text color="#888">
-          {`${results.length}/${limit === Infinity ? total : limit}`}
-        </Text>
+        <Text color="#555">{'───'}</Text>
+        <Text color="#888">{`${processed}/${target}`}</Text>
+        <Text color="#555">{'│'}</Text>
+        <Text color="#f1fa8c">{'⏱ '}{formatTime(elapsed)}</Text>
+        <Text color="#555">{'│'}</Text>
+        <Text color="#50fa7b">{'⚡ '}{rate.toFixed(1)}{'/hr'}</Text>
+        <Text color="#555">{'│'}</Text>
+        <Text color="#ffb86c">{'⏳ '}{formatETA(eta)}</Text>
       </Box>
 
       <Box flexDirection="column" gap={0}>
@@ -55,9 +94,10 @@ const Progress = ({results, total, current, limit}) => {
 
       <Box justifyContent="space-between">
         <Text color="#666">
-          {'  '}{results.filter(r => r.status === 'solved').length}{' solved'}
+          {'  '}{solved}{' solved'}
           {'  ·  '}
-          {results.filter(r => r.status === 'skipped').length}{' skipped'}
+          {skipped}{' skipped'}
+          {failed > 0 && <>{'  ·  '}{<Text color="#ff5555">{failed} failed</Text>}</>}
         </Text>
         {current && (
           <Text color="#FFA116" bold>

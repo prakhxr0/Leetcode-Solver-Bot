@@ -1,12 +1,11 @@
-import React, {useState, useCallback, useEffect, useRef} from 'react';
-import {Box, Text, useApp} from 'ink';
+import React, {useState, useCallback, useEffect} from 'react';
+import {Box, Text} from 'ink';
 import Banner from './components/Banner.tsx';
 import LoginPrompt from './components/LoginPrompt.tsx';
 import ProblemInput from './components/ProblemInput.tsx';
 import Progress from './components/Progress.tsx';
 import Complete from './components/Complete.tsx';
 import Authenticator from '../core/Authenticator.js';
-import Solver from '../core/Solver.js';
 import FileManager from '../file/FileManager.js';
 import {closeBrowser} from '../browser/BrowserManager.js';
 
@@ -25,8 +24,7 @@ const App = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [limit, setLimit] = useState(Infinity);
   const [error, setError] = useState(null);
-  const {exit} = useApp();
-  const solverRef = useRef(null);
+  const [startTime, setStartTime] = useState(null);
 
   // Auto-advance banner after 2s
   useEffect(() => {
@@ -46,6 +44,7 @@ const App = () => {
 
   const handleCountSubmit = useCallback(async (count) => {
     setLimit(count);
+    setStartTime(Date.now());
     setPhase(PHASES.SOLVING);
 
     try {
@@ -203,6 +202,7 @@ const App = () => {
           total={totalCount}
           current={currentProblem}
           limit={limit}
+          startTime={startTime}
         />
       )}
       {phase === PHASES.DONE && <Complete results={results} />}
