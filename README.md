@@ -10,6 +10,7 @@
 ![Puppeteer](https://img.shields.io/badge/Puppeteer-headless%20chrome-40B5A4?style=flat-square&logo=googlechrome&logoColor=white)
 ![C++](https://img.shields.io/badge/C%2B%2B-1465%2B%20solutions-00599C?style=flat-square&logo=cplusplus&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
+![Docker](https://img.shields.io/badge/Docker-prakhxr%2Fleetcode--solver--bot-2496ED?style=flat-square&logo=docker&logoColor=white)
 
 </div>
 
@@ -19,6 +20,9 @@
 
 >[!NOTE]
 >->no you wont get blocked by leetcode, i have tested it with many accounts. you can inflate your lc profile with extreme ease with this bot. many recruiters use leetcode to screen candidates, and the number matters for the initial screening.
+
+>[!TIP]
+>docker image is self-contained (~500mb due to chromium) and does not require any additional setup. for the first run, headful browser is required for the initial login step — after login, you can terminate it and start the headless container.
 
 <br/>
 
@@ -65,33 +69,42 @@
 
 ## 🚀 Setup
 
+### Docker (Recommended)
+
+No Node.js or Chrome needed on your machine.
+
+**1. Pull the image**
+```bash
+docker pull prakhxr/leetcode-solver-bot
+```
+
+**2. First run — login mode**
+```bash
+docker run -it \
+  -e HEADLESS=false \
+  -v $(pwd)/UserData:/app/UserData \
+  --network host \
+  prakhxr/leetcode-solver-bot
+```
+A Chrome window opens. Complete the Cloudflare challenge manually — session is saved to `./UserData` and reused from here on.
+
+**3. Subsequent runs — headless**
+```bash
+docker run -it \
+  -e HEADLESS=true \
+  -v $(pwd)/UserData:/app/UserData \
+  prakhxr/leetcode-solver-bot
+```
+
+---
+
+### Development Setup
+
 ### Prerequisites
 
 - Node.js 18+ (for development)
 - Docker (for production)
 - Chrome or Chromium (optional for development)
-
-### Docker Setup (Recommended)
-
-**1. Clone & build**
-```bash
-git clone https://github.com/PrakharMishra531/Leetcoder.git
-cd Leetcoder
-docker-compose build
-```
-
-**2. Run (first time - login mode)**
-```bash
-HEADLESS=false docker-compose run leetcode
-```
-A Chrome window will open. Complete the Cloudflare challenge manually — the session is persisted.
-
-**3. Run (subsequent runs - headless)**
-```bash
-HEADLESS=true docker-compose run leetcode
-```
-
-### Development Setup
 
 **1. Clone & install**
 ```bash
@@ -107,7 +120,11 @@ GOOGLE_CHROME_EXECUTABLE_PATH=/path/to/chrome   # optional — auto-detected if 
 
 **3. Run**
 ```bash
+# Normal run
 npm start
+
+# Headless mode (after first login)
+HEADLESS=true npm start
 ```
 
 ### Platform Support
@@ -126,17 +143,17 @@ npm start
 xhost +local:docker
 
 # First time - login mode (headed Chrome)
-HEADLESS=false docker-compose run leetcode
+HEADLESS=false docker compose run leetcode
 
 # Subsequent runs - headless mode (no display needed)
-HEADLESS=true docker-compose run leetcode
+HEADLESS=true docker compose run leetcode
 
 # Rebuild after code changes
-docker-compose build
+docker compose build
 
 # Clear data and start fresh
 rm -rf ./UserData
-HEADLESS=true docker-compose run leetcode
+HEADLESS=true docker compose run leetcode
 ```
 
 ---
