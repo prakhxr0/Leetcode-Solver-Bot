@@ -69,29 +69,63 @@
 
 ## 🚀 Setup
 
-### Prerequisites
+### Docker (Recommended)
 
-- **Node.js 18+**
-- **Google Chrome for Testing** (downloaded locally — no system Chrome needed)
+No Node.js or Chrome needed on your host. The image ships with Chrome for Testing, all dependencies, and the problem archive — everything works out of the box.
+
+**1. Pull the image**
+```bash
+docker pull prakhxr/leetcode-solver-bot
+```
+> [Docker Hub](https://hub.docker.com/repository/docker/prakhxr/leetcode-solver-bot/)
+
+**2. First run — login mode**
+```bash
+docker run -it \
+  -e HEADLESS=false \
+  -v $(pwd)/UserData:/app/UserData \
+  --network host \
+  prakhxr/leetcode-solver-bot
+```
+A Chrome window opens. Enter your LeetCode credentials and complete any Cloudflare challenge. After login, close the bot — your session is saved to `./UserData/` and reused from here on.
+
+**3. Subsequent runs — headless**
+```bash
+docker run -it \
+  -e HEADLESS=true \
+  -v $(pwd)/UserData:/app/UserData \
+  prakhxr/leetcode-solver-bot
+```
+
+**Or use docker compose (from a cloned repo):**
+```bash
+# First run — login
+HEADLESS=false docker compose run leetcode
+
+# Subsequent runs — headless
+HEADLESS=true docker compose run leetcode
+```
 
 ---
 
-### Step 1 — Clone & install
+### npm (Local Development)
 
+Requires Node.js 18+ and a local Chrome for Testing download.
+
+**1. Clone & install**
 ```bash
-git clone https://github.com/prakhxr0/Leetcode-Solver-Bot.git
-cd Leetcode-Solver-Bot
+git clone https://github.com/prakhxr0/Leetcoder.git
+cd Leetcoder
 npm install
 ```
 
-### Step 2 — Download Chrome for Testing
+**2. Download Chrome for Testing**
 
 The bot uses a project-local Chrome binary so it doesn't interfere with your system browser.
 
 **Linux (x64):**
 ```bash
-mkdir -p .chromium
-cd .chromium
+mkdir -p .chromium && cd .chromium
 curl -sL "https://storage.googleapis.com/chrome-for-testing-public/121.0.6167.85/linux64/chrome-linux64.zip" -o chrome.zip
 unzip -q chrome.zip && rm chrome.zip
 chmod +x chrome-linux64/chrome
@@ -100,8 +134,7 @@ cd ..
 
 **macOS (Apple Silicon):**
 ```bash
-mkdir -p .chromium
-cd .chromium
+mkdir -p .chromium && cd .chromium
 curl -sL "https://storage.googleapis.com/chrome-for-testing-public/121.0.6167.85/mac-arm64/chrome-mac-arm64.zip" -o chrome.zip
 unzip -q chrome.zip && rm chrome.zip
 cd ..
@@ -109,8 +142,7 @@ cd ..
 
 **macOS (Intel):**
 ```bash
-mkdir -p .chromium
-cd .chromium
+mkdir -p .chromium && cd .chromium
 curl -sL "https://storage.googleapis.com/chrome-for-testing-public/121.0.6167.85/mac-x64/chrome-mac-x64.zip" -o chrome.zip
 unzip -q chrome.zip && rm chrome.zip
 cd ..
@@ -126,31 +158,28 @@ Remove-Item chrome.zip
 cd ..
 ```
 
-### Step 3 — Configure `.env`
+**3. Configure `.env`**
 
 Create a `.env` file in the project root:
 
 ```env
 USER_EMAIL=your-email@example.com
-GOOGLE_CHROME_EXECUTABLE_PATH=/full/path/to/Leetcode-Solver-Bot/.chromium/chrome-linux64/chrome
+GOOGLE_CHROME_EXECUTABLE_PATH=/full/path/to/Leetcoder/.chromium/chrome-linux64/chrome
 ```
 
-> **Linux:** Use the absolute path, e.g. `/home/you/projects/Leetcode-Solver-Bot/.chromium/chrome-linux64/chrome`
+> **Linux:** `/home/you/projects/Leetcoder/.chromium/chrome-linux64/chrome`
 >
-> **macOS:** Use `.chromium/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing`
+> **macOS:** `.chromium/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing`
 >
-> **Windows:** Use `.chromium\chrome-win64\chrome.exe`
+> **Windows:** `.chromium\chrome-win64\chrome.exe`
 
-### Step 4 — First run (login)
-
+**4. First run (login)**
 ```bash
 npm start
 ```
-
 A Chrome window opens. Enter your LeetCode credentials and complete any Cloudflare challenge. After login, close the bot — your session is saved in `./UserData/` and reused from here on.
 
-### Step 5 — Run headless
-
+**5. Run headless**
 ```bash
 HEADLESS=true npm start
 ```
@@ -163,39 +192,6 @@ HEADLESS=true npm start
 | **macOS** | Install XQuartz: `brew install --cask xquartz`, then logout/login |
 | **WSL2** | WSLg is built-in on Windows 11, works automatically |
 | **Windows** | Use PowerShell or Git Bash |
-
-### Docker (alternative)
-
-No Node.js or Chrome needed on your host. Everything is bundled in the image.
-
-**1. Build the image**
-```bash
-docker compose build
-```
-
-**2. First run — login mode**
-```bash
-HEADLESS=false docker compose run leetcode
-```
-A Chrome window opens. Enter your LeetCode credentials and complete any Cloudflare challenge. After login, close the bot — your session is saved to `./UserData/` and reused from here on.
-
-**3. Subsequent runs — headless**
-```bash
-HEADLESS=true docker compose run leetcode
-```
-
-**Other commands:**
-```bash
-# Allow Docker to access X11 (Linux/macOS)
-xhost +local:docker
-
-# Rebuild after code changes
-docker compose build
-
-# Clear data and start fresh
-rm -rf ./UserData
-HEADLESS=true docker compose run leetcode
-```
 
 ---
 
