@@ -1,10 +1,6 @@
 ### Leetcode Solver Bot
 ![Leetcode Solver Bot](./assets/banner.jpg)
 
-*"I came, I saw, I copied the optimal solution."* — Julius Caesar, probably
-
-<br/>
-
 ![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=flat-square&logo=node.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-blue?style=flat-square&logo=typescript&logoColor=white)
 ![Puppeteer](https://img.shields.io/badge/Puppeteer-headless%20chrome-40B5A4?style=flat-square&logo=googlechrome&logoColor=white)
@@ -12,17 +8,12 @@
 ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 ![Docker](https://img.shields.io/badge/Docker-prakhxr%2Fleetcode--solver--bot-2496ED?style=flat-square&logo=docker&logoColor=white)
 
-</div>
+> **Leetcode Solver Bot** is a fully local automated LeetCode solver that solves and submits 1,465+ LeetCode problems automatically — no API key needed. It reads solutions from a local archive, injects them into LeetCode's Monaco editor via Puppeteer browser automation, and submits — all from a tui. Useful for boosting your LeetCode profile stats and problem-solved count.
+
+*"I came, I saw, I copied the optimal solution."* ~ Julius Caesar, probably
 
 ---
 
-> Automated LeetCode solution submission bot. Reads C++ solutions from a local archive of **1,465+ problems**, injects them into LeetCode's Monaco editor via Puppeteer, and submits — all from a slick Ink-based terminal UI.
-
->[!NOTE]
->->no you wont get blocked by leetcode, i have tested it with many accounts. you can inflate your lc profile with extreme ease with this bot. many recruiters use leetcode to screen candidates, and the number matters for the initial screening.
-
->[!TIP]
->docker image is self-contained (~500mb due to chromium) and does not require any additional setup. for the first run, headful browser is required for the initial login step — after login, you can terminate it and start the headless container.
 
 <br/>
 
