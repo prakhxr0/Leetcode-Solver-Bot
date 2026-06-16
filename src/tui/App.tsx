@@ -8,7 +8,7 @@ import Progress from './components/Progress.tsx';
 import Complete from './components/Complete.tsx';
 import Authenticator from '../core/Authenticator.js';
 import FileManager from '../file/FileManager.js';
-import {closeBrowser, clearBrowserCache, resetBrowser} from '../browser/BrowserManager.js';
+import {closeBrowser, clearBrowserCache, resetBrowser, getPage, resetPage} from '../browser/BrowserManager.js';
 import {setEmail, getUserEmail} from '../config.js';
 
 const PHASES = {
@@ -67,16 +67,16 @@ const App = () => {
       const allProblems = await FileManager.getAllProblemsNames();
       setTotalCount(allProblems.length);
 
-      let solved = 0;
-      for (const problemName of allProblems) {
-        if (solved >= count) break;
+      const solvedSet = await FileManager.getSolvedProblemSet();
+      const unsolvedProblems = allProblems.filter(p => !solvedSet.has(p));
+      const skippedCount = allProblems.length - unsolvedProblems.length;
+      if (skippedCount > 0) {
+        addResult({name: '_batch', status: 'skipped_summary', detail: `${skippedCount} already solved`});
+      }
 
-        // Check if already solved
-        const solvedSet = await FileManager.getSolvedProblemSet();
-        if (solvedSet.has(problemName)) {
-          addResult({name: problemName, status: 'skipped', detail: 'already solved'});
-          continue;
-        }
+      let solved = 0;
+      for (const problemName of unsolvedProblems) {
+        if (solved >= count) break;
 
         setCurrentProblem(problemName);
 
@@ -100,22 +100,20 @@ const App = () => {
         addResult({name: problemName, status: 'judging'});
 
         try {
-          // Import solver methods directly to get verdict info
-          const {getBrowserDetails} = await import('../browser/BrowserManager.js');
+          const {getPage: getActivePage} = await import('../browser/BrowserManager.js');
           const {sleep} = await import('../utils/helpers.js');
           const {default: Logger} = await import('../utils/Logger.js');
 
-          let {page} = await getBrowserDetails();
+          let page = await getActivePage();
           try {
             await page.goto(`https://leetcode.com/problems/${problemName}`, {
               waitUntil: 'domcontentloaded',
               timeout: 30000,
             });
           } catch (navErr) {
-            // Stuck tab — reset browser and retry once
             Logger.warn(`[BROWSER_RESET]\t\t: Navigation failed, resetting...`);
             await resetBrowser();
-            ({page} = await getBrowserDetails());
+            page = await getActivePage();
             await page.goto(`https://leetcode.com/problems/${problemName}`, {
               waitUntil: 'domcontentloaded',
               timeout: 30000,
@@ -200,7 +198,7 @@ const App = () => {
           solved++;
           if (solved % 5 === 0) await sleep(15);
           if (solved % 10 === 0) await clearBrowserCache();
-          if (solved % 10 === 0) await resetBrowser();
+          if (solved % 10 === 0) await resetPage();
           await sleep(8);
 
         } catch (err) {

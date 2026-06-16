@@ -8,7 +8,6 @@ services:
     tty: true
     environment:
       - DISPLAY=${DISPLAY}
-      - HEADLESS=${HEADLESS:-false}
       - GOOGLE_CHROME_EXECUTABLE_PATH=/opt/chrome-for-testing/chrome-linux64/chrome
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix

@@ -4,6 +4,7 @@ import {Box, Text} from 'ink';
 const STATUS_STYLES = {
   solved: {color: '#50fa7b', icon: '✓', label: 'solved'},
   skipped: {color: '#888', icon: '→', label: 'skipped'},
+  skipped_summary: {color: '#888', icon: '→', label: 'skipped'},
   premium: {color: '#ffb86c', icon: '◆', label: 'premium'},
   failed: {color: '#ff5555', icon: '✗', label: 'failed'},
   judging: {color: '#f1fa8c', icon: '◎', label: 'judging'},
@@ -40,6 +41,8 @@ const Progress = ({results, total, current, limit, startTime}) => {
 
   const solved = results.filter(r => r.status === 'solved').length;
   const skipped = results.filter(r => r.status === 'skipped').length;
+  const skippedSummary = results.filter(r => r.status === 'skipped_summary');
+  const skippedTotal = skipped + skippedSummary.reduce((acc, r) => acc + parseInt(r.detail) || 0, 0);
   const failed = results.filter(r => r.status === 'failed').length;
   const processed = solved + skipped + failed + results.filter(r => r.status === 'premium').length;
   const target = limit === Infinity ? total : limit;
@@ -96,7 +99,7 @@ const Progress = ({results, total, current, limit, startTime}) => {
         <Text color="#666">
           {'  '}{solved}{' solved'}
           {'  ·  '}
-          {skipped}{' skipped'}
+          {skippedTotal}{' skipped'}
           {failed > 0 && <>{'  ·  '}{<Text color="#ff5555">{failed} failed</Text>}</>}
         </Text>
         {current && (

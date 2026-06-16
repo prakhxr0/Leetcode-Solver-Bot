@@ -5,9 +5,7 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "node --max-old-space-size=4096 --import tsx/esm src/index.tsx",
-    "start:headless": "HEADLESS=true node --max-old-space-size=4096 --import tsx/esm src/index.tsx",
-    "login": "HEADLESS=false node --max-old-space-size=4096 --import tsx/esm src/index.tsx"
+    "start": "node --max-old-space-size=4096 --import tsx/esm src/index.tsx"
   },
   "keywords": [
     "leetcode",

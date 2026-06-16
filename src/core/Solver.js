@@ -1,7 +1,7 @@
 import Logger from '../utils/Logger.js';
 import FileManager from '../file/FileManager.js';
 import LeetCodeAPI from '../api/LeetCodeAPI.js';
-import {getBrowserDetails, clearBrowserCache, closeBrowser, resetBrowser} from '../browser/BrowserManager.js';
+import {getPage, clearBrowserCache, closeBrowser, resetBrowser, resetPage} from '../browser/BrowserManager.js';
 import {sleep} from '../utils/helpers.js';
 
 const LANG_IDS = {
@@ -90,7 +90,7 @@ class Solver {
       Logger.warn(`[API_CHECK_FAILED]\t\t:${problemName} - ${err.message}. Continuing anyway.`);
     }
 
-    const {page} = await getBrowserDetails();
+    const page = await getPage();
     try {
       await page.goto(`https://leetcode.com/problems/${problemName}`, {
         waitUntil: 'domcontentloaded',
@@ -227,16 +227,18 @@ class Solver {
   }
 
   static async #solveBatch(problemNames, maxCount) {
+    const solvedSet = await FileManager.getSolvedProblemSet();
+    const unsolvedProblems = problemNames.filter(p => !solvedSet.has(p));
+    const skippedCount = problemNames.length - unsolvedProblems.length;
+    if (skippedCount > 0) {
+      Logger.success(`[SKIPPED]\t\t\t:${skippedCount} already solved`);
+    }
+
     let solved = 0;
-    for (const problemName of problemNames) {
+    for (const problemName of unsolvedProblems) {
       if (solved >= maxCount) {
         Logger.success(`[REACHED_LIMIT]\t\t\t:${maxCount} problems. Stopping.`);
         break;
-      }
-
-      if (await this.#isSolvedEarlier(problemName)) {
-        Logger.success(`[SOLVED_EARLIER]\t\t:${problemName}`);
-        continue;
       }
 
       await this.#solveProblem(problemName);
@@ -253,8 +255,8 @@ class Solver {
       }
 
       if (solved % 10 === 0) {
-        Logger.warn(`[BROWSER_RESET]\t\t: Periodic browser restart after ${solved} problems...`);
-        await resetBrowser();
+        Logger.warn(`[RESET_PAGE]\t\t: Clearing page state after ${solved} problems...`);
+        await resetPage();
       }
     }
   }

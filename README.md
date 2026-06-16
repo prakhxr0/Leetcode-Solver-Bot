@@ -3,7 +3,7 @@
 
 ![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=flat-square&logo=node.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-blue?style=flat-square&logo=typescript&logoColor=white)
-![Puppeteer](https://img.shields.io/badge/Puppeteer-headless%20chrome-40B5A4?style=flat-square&logo=googlechrome&logoColor=white)
+![Puppeteer](https://img.shields.io/badge/Puppeteer-chrome-40B5A4?style=flat-square&logo=googlechrome&logoColor=white)
 ![C++](https://img.shields.io/badge/C%2B%2B-1465%2B%20solutions-00599C?style=flat-square&logo=cplusplus&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 ![Docker](https://img.shields.io/badge/Docker-prakhxr%2Fleetcode--solver--bot-2496ED?style=flat-square&logo=docker&logoColor=white)
@@ -36,7 +36,7 @@
 | **Smart rate limiting** | 8s between submissions, 15s cooldown every 5 problems — time estimate shown upfront |
 | **Verdict detection** | Polls "Judging…" state transitions to capture the actual result reliably |
 | **Skip logic** | Auto-skips already-solved and premium problems via GraphQL status check |
-| **Docker support** | Self-contained container with Chromium; run headless after first login |
+| **Docker support** | Self-contained container with Chromium |
 
 
 ---
@@ -70,31 +70,18 @@ docker pull prakhxr/leetcode-solver-bot
 ```
 > [Docker Hub](https://hub.docker.com/repository/docker/prakhxr/leetcode-solver-bot/)
 
-**2. First run — login mode**
+**2. Run**
 ```bash
 docker run -it \
-  -e HEADLESS=false \
   -v $(pwd)/UserData:/app/UserData \
   --network host \
   prakhxr/leetcode-solver-bot
 ```
 A Chrome window opens. Enter your LeetCode credentials and complete any Cloudflare challenge. After login, close the bot — your session is saved to `./UserData/` and reused from here on.
 
-**3. Subsequent runs — headless**
-```bash
-docker run -it \
-  -e HEADLESS=true \
-  -v $(pwd)/UserData:/app/UserData \
-  prakhxr/leetcode-solver-bot
-```
-
 **Or use docker compose (from a cloned repo):**
 ```bash
-# First run — login
-HEADLESS=false docker compose run leetcode
-
-# Subsequent runs — headless
-HEADLESS=true docker compose run leetcode
+docker compose run leetcode
 ```
 
 ---
@@ -170,11 +157,6 @@ npm start
 ```
 A Chrome window opens. Enter your LeetCode credentials and complete any Cloudflare challenge. After login, close the bot — your session is saved in `./UserData/` and reused from here on.
 
-**5. Run headless**
-```bash
-HEADLESS=true npm start
-```
-
 ### Platform notes
 
 | Platform | Notes |
@@ -244,7 +226,7 @@ Drop new solutions into `data/problems/` as JSON files following the existing fo
 
 ## ⚠️ Known Limitations
 
-- **Cloudflare** — Requires a one-time manual login in headed mode. After that, headless mode works.
+- **Cloudflare** — Requires a one-time manual login. After that, the session is remembered.
 - **Rate delays** — Fixed cooldowns; may need tuning for different network conditions.
 - **Premium problems** — Detected via GraphQL and skipped automatically. Can't solve what you can't see.
 - **Session expiry** — Long breaks may require re-authentication.

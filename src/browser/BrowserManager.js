@@ -52,7 +52,7 @@ class BrowserManager {
     }
 
       BrowserManager.browser = await puppeteer.launch({
-        headless: process.env.HEADLESS === 'true' ? 'new' : false,
+        headless: false,
         executablePath: GOOGLE_CHROME_EXECUTABLE_PATH,
         userDataDir: chromeProfilePath,
         defaultViewport: null,
@@ -60,6 +60,34 @@ class BrowserManager {
       });
 
       [BrowserManager.page] = await BrowserManager.browser.pages();
+    }
+  }
+
+  static async getPage() {
+    if (!BrowserManager.browser || !BrowserManager.page) {
+      await BrowserManager.init();
+    }
+    return BrowserManager.page;
+  }
+
+  static async resetPage() {
+    if (!BrowserManager.page) return;
+    Logger.warn(`[RESET_PAGE]\t\t: Clearing page state...`);
+    try {
+      // Clear DOM and JS state by navigating to about:blank
+      await BrowserManager.page.goto('about:blank', {waitUntil: 'load', timeout: 5000});
+      // Clear storage via CDP
+      const client = await BrowserManager.page.createCDPSession();
+      await client.send('Storage.clearCookies');
+      await client.send('Runtime.evaluate', {expression: 'try{localStorage.clear()}catch(e){}'});
+      await client.send('Runtime.evaluate', {expression: 'try{sessionStorage.clear()}catch(e){}'});
+      await client.detach();
+      // Clear HTTP cache
+      await BrowserManager.clearCache();
+      Logger.success(`[RESET_PAGE]\t\t: Page state cleared.`);
+    } catch (err) {
+      Logger.error(`[RESET_PAGE_FAILED]\t:${err.message}. Resetting browser...`);
+      await BrowserManager.resetBrowser();
     }
   }
 
@@ -104,6 +132,8 @@ class BrowserManager {
 }
 
 export const getBrowserDetails = async () => BrowserManager.getBrowserDetails();
+export const getPage = async () => BrowserManager.getPage();
+export const resetPage = async () => BrowserManager.resetPage();
 export const clearBrowserCache = async () => BrowserManager.clearCache();
 export const resetBrowser = async () => BrowserManager.resetBrowser();
 export const closeBrowser = async () => BrowserManager.closeBrowser();
