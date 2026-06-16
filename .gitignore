@@ -1,4 +1,5 @@
 node_modules/
 UserData/
+.chromium/
 .env
 .email
