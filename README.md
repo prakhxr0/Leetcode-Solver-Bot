@@ -164,6 +164,39 @@ HEADLESS=true npm start
 | **WSL2** | WSLg is built-in on Windows 11, works automatically |
 | **Windows** | Use PowerShell or Git Bash |
 
+### Docker (alternative)
+
+No Node.js or Chrome needed on your host. Everything is bundled in the image.
+
+**1. Build the image**
+```bash
+docker compose build
+```
+
+**2. First run — login mode**
+```bash
+HEADLESS=false docker compose run leetcode
+```
+A Chrome window opens. Enter your LeetCode credentials and complete any Cloudflare challenge. After login, close the bot — your session is saved to `./UserData/` and reused from here on.
+
+**3. Subsequent runs — headless**
+```bash
+HEADLESS=true docker compose run leetcode
+```
+
+**Other commands:**
+```bash
+# Allow Docker to access X11 (Linux/macOS)
+xhost +local:docker
+
+# Rebuild after code changes
+docker compose build
+
+# Clear data and start fresh
+rm -rf ./UserData
+HEADLESS=true docker compose run leetcode
+```
+
 ---
 
 ## ⚙️ Configuration

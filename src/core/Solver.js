@@ -252,7 +252,7 @@ class Solver {
         await clearBrowserCache();
       }
 
-      if (solved % 15 === 0) {
+      if (solved % 10 === 0) {
         Logger.warn(`[BROWSER_RESET]\t\t: Periodic browser restart after ${solved} problems...`);
         await resetBrowser();
       }

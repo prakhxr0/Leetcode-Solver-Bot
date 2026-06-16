@@ -200,7 +200,7 @@ const App = () => {
           solved++;
           if (solved % 5 === 0) await sleep(15);
           if (solved % 10 === 0) await clearBrowserCache();
-          if (solved % 15 === 0) await resetBrowser();
+          if (solved % 10 === 0) await resetBrowser();
           await sleep(8);
 
         } catch (err) {

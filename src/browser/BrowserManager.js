@@ -17,6 +17,11 @@ class BrowserManager {
         "--disable-crash-reporter",          // no crash dumps
         "--disable-breakpad",                // no crash dumps
         "--noerrdialogs",                    // suppress error dialogs
+        "--disable-extensions",              // no extensions memory
+        "--disable-background-networking",   // reduce background activity
+        "--disable-default-apps",            // no built-in apps
+        "--disable-sync",                    // no sync service
+        "--no-first-run",                    // skip first run tasks
       ];
       if (process.platform !== "win32") {
         args.push("--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage");
