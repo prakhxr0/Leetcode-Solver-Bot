@@ -8,7 +8,7 @@ import Progress from './components/Progress.tsx';
 import Complete from './components/Complete.tsx';
 import Authenticator from '../core/Authenticator.js';
 import FileManager from '../file/FileManager.js';
-import {closeBrowser} from '../browser/BrowserManager.js';
+import {closeBrowser, clearBrowserCache} from '../browser/BrowserManager.js';
 import {setEmail, getUserEmail} from '../config.js';
 
 const PHASES = {
@@ -188,6 +188,7 @@ const App = () => {
 
           solved++;
           if (solved % 5 === 0) await sleep(15);
+          if (solved % 10 === 0) await clearBrowserCache();
           await sleep(8);
 
         } catch (err) {

@@ -8,7 +8,15 @@ class BrowserManager {
 
   static async init() {
     if (!BrowserManager.browser) {
-      const args = ["--start-maximized"];
+      const args = [
+        "--start-maximized",
+        "--disk-cache-size=209715200",       // 200MB cap on HTTP cache
+        "--media-cache-size=104857600",      // 100MB cap on media cache
+        "--disable-application-cache",       // disable AppCache entirely
+        "--disable-crash-reporter",          // no crash dumps
+        "--disable-breakpad",                // no crash dumps
+        "--noerrdialogs",                    // suppress error dialogs
+      ];
       if (process.platform !== "win32") {
         args.push("--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage");
       }
@@ -56,9 +64,26 @@ class BrowserManager {
     return {page: BrowserManager.page, browser: BrowserManager.browser};
   }
 
+  static async clearCache() {
+    if (!BrowserManager.page) return;
+    try {
+      const client = await BrowserManager.page.createCDPSession();
+      await client.send('Network.clearBrowserCache');
+      await client.detach();
+    } catch (_) {}
+  }
+
   static async closeBrowser() {
     if (BrowserManager.browser) {
-      await BrowserManager.browser.close();
+      try {
+        await BrowserManager.browser.close();
+      } catch (_) {
+        // Force-kill the child process if graceful close fails
+        try {
+          const proc = BrowserManager.browser.process();
+          if (proc) proc.kill('SIGKILL');
+        } catch (_) {}
+      }
       BrowserManager.browser = null;
       BrowserManager.page = null;
     }
@@ -66,4 +91,5 @@ class BrowserManager {
 }
 
 export const getBrowserDetails = async () => BrowserManager.getBrowserDetails();
+export const clearBrowserCache = async () => BrowserManager.clearCache();
 export const closeBrowser = async () => BrowserManager.closeBrowser();

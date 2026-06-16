@@ -1,7 +1,7 @@
 import Logger from '../utils/Logger.js';
 import FileManager from '../file/FileManager.js';
 import LeetCodeAPI from '../api/LeetCodeAPI.js';
-import {getBrowserDetails} from '../browser/BrowserManager.js';
+import {getBrowserDetails, clearBrowserCache, closeBrowser} from '../browser/BrowserManager.js';
 import {sleep} from '../utils/helpers.js';
 
 const LANG_IDS = {
@@ -235,15 +235,24 @@ class Solver {
         Logger.warn(`[PAUSE]\t\t\t: Cooling down after ${solved} submissions...`);
         await sleep(15);
       }
+
+      if (solved % 10 === 0) {
+        Logger.warn(`[CLEARING_CACHE]\t\t: Flushing browser cache...`);
+        await clearBrowserCache();
+      }
     }
   }
 
   static async run(count = Infinity) {
     Logger.error('<<<< Starting Solver >>>>');
-    const allProblems = await FileManager.getAllProblemsNames();
-    Logger.success(`[QUEUED]\t\t\t:${allProblems.length} problems total`);
-    await this.#solveBatch(allProblems, count);
-    Logger.error('<<<< Exiting Solver >>>>');
+    try {
+      const allProblems = await FileManager.getAllProblemsNames();
+      Logger.success(`[QUEUED]\t\t\t:${allProblems.length} problems total`);
+      await this.#solveBatch(allProblems, count);
+    } finally {
+      Logger.error('<<<< Exiting Solver >>>>');
+      await closeBrowser();
+    }
   }
 }
 
