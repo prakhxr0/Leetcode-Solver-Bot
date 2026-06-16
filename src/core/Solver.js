@@ -253,6 +253,11 @@ class Solver {
         Logger.warn(`[CLEARING_CACHE]\t\t: Flushing browser cache...`);
         await clearBrowserCache();
       }
+
+      if (solved % 50 === 0) {
+        Logger.warn(`[BROWSER_RESTART]\t: Restarting browser to free Node.js heap...`);
+        await resetBrowser();
+      }
     }
   }
 
